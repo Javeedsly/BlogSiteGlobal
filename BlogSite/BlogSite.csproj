@@ -7,14 +7,19 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Folder Include="Areas\Admin\Views\" />
-    <Folder Include="Controllers\" />
-    <Folder Include="wwwroot\" />
-    <Folder Include="Views\" />
+    <Folder Include="wwwroot\uploads\portfolios\" />
   </ItemGroup>
 
   <ItemGroup>
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="8.0.0">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
     <PackageReference Include="Microsoft.VisualStudio.Web.CodeGeneration.Design" Version="8.0.7" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\BlogSite.Business\BlogSite.Business.csproj" />
   </ItemGroup>
 
 </Project>

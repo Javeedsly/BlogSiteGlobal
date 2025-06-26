@@ -1,4 +1,5 @@
 ﻿using BlogSite.Areas.Admin.ViewModels;
+using BlogSite.Core.Models;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 
@@ -25,7 +26,7 @@ namespace BlogSite.Areas.Admin.Controllers
                 UserName = "Admin"
             };
 
-            await _userManager.CreateAsync(admin, "Admin123@");
+            await _userManager.CreateAsync(admin, "Admin123");
             await _userManager.AddToRoleAsync(admin, "SuperAdmin");
             return Ok("Admin yarandi!");
         }
@@ -61,7 +62,8 @@ namespace BlogSite.Areas.Admin.Controllers
                 ModelState.AddModelError("", "Username or passwor dis not valid!");
                 return View();
             }
-            return RedirectToAction("Index", "Dashboard");
+            return RedirectToAction("Index", "Dashboard", new { area = "Admin" });
+
         }
         public async Task<IActionResult> SignOut()
         {
