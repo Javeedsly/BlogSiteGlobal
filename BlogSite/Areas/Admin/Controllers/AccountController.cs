@@ -23,7 +23,8 @@ namespace BlogSite.Areas.Admin.Controllers
             AppUser admin = new()
             {
                 FullName = "Cavid suleymanli",
-                UserName = "Admin"
+                UserName = "Admin",
+                Email = "cavidsly@gmail.com"
             };
 
             await _userManager.CreateAsync(admin, "Admin123");
