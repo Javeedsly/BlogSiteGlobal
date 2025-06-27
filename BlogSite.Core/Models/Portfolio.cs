@@ -11,14 +11,10 @@ namespace BlogSite.Core.Models
 {
     public class Portfolio : BaseEntity
     {
-        [Required]
-        [StringLength(50)]
         public string Title { get; set; }
-        [Required]
-        [StringLength(50)]
-        public string ProjectUrl { get; set; }
-        public string? ImageUrl { get; set; }
+        public string? ImagePath { get; set; }  // <-- şəkilin yolu
         [NotMapped]
-        public IFormFile? ImageFile { get; set; }
+        public IFormFile? ImageFile { get; set; }  // <-- HTTP POST üçün
+        public string ProjectUrl { get; set; }
     }
 }

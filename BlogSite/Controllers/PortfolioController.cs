@@ -16,5 +16,6 @@ namespace BlogSite.Controllers
             var portfolios = _context.Portfolio.ToList();
             return View(portfolios);
         }
+
     }
 }
