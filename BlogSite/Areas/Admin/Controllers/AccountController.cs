@@ -1,7 +1,11 @@
 ﻿using BlogSite.Areas.Admin.ViewModels;
 using BlogSite.Core.Models;
+using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Authentication.Cookies;
+
 
 namespace BlogSite.Areas.Admin.Controllers
 {
@@ -66,9 +70,11 @@ namespace BlogSite.Areas.Admin.Controllers
             return RedirectToAction("Index", "Dashboard", new { area = "Admin" });
 
         }
-        public async Task<IActionResult> SignOut()
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Logout()
         {
-            await _signInManager.SignOutAsync();
+            await HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
             return RedirectToAction("Login", "Account");
         }
     }

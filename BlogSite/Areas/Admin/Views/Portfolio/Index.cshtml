@@ -15,10 +15,8 @@
             <table class="table">
                 <thead>
                     <tr>
-                        <th scope="col">#</th>
                         <th scope="col">Id</th>
                         <th scope="col">Title</th>
-                        <th scope="col">Description</th>
                         <th scope="col">ProjectUrl</th>
                         <th scope="col">Image</th>
                     </tr>
@@ -28,10 +26,12 @@
                     {
                         <tr>
                             <th scope="row">@(counter++)</th>
-                            <td>@item.Id</td>
                             <td>@item.Title</td>
-                            <td>@item.ProjectUrl</td>
-                            <td><img src="~/uploads/portfolios/@item.ImagePath" width="100" height="100" /></td>
+                            <td><a href="@item.ProjectUrl" target="_blank">@item.ProjectUrl</a></td>
+                            <td>
+                                <img src="@Url.Content(item.ImagePath)"
+                                     width="100" height="100" />
+                            </td>
                             <td>
                                 <a asp-action="Update" asp-controller="Portfolio" asp-route-id="@item.Id" class="btn btn-outline-warning">Update</a>
                                 <a asp-action="Delete" asp-controller="Portfolio" asp-route-id="@item.Id" class="btn btn-outline-danger">Delete</a>

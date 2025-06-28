@@ -17,10 +17,19 @@ public class PortfolioService : IPortfolioService
 
     public async Task AddPortfolio(Portfolio portfolio)
     {
-        if (portfolio.ImageFile == null)
+        // 1) Fayl yoxdursa exception
+        if (portfolio.ImageFile == null || portfolio.ImageFile.Length == 0)
             throw new System.IO.FileNotFoundException("Fayl boş ola bilməz!");
 
-        portfolio.ImagePath = Helper.SaveFile(_env.WebRootPath, "uploads/portfolios", portfolio.ImageFile);
+        // 2) FileHelper ilə serverə yaz və browser üçün URL al
+        //    "uploads/portfolios" qovluğunu wwwroot altında gözləyir
+        portfolio.ImagePath = Helper.SaveImage(
+            _env,
+            portfolio.ImageFile,
+            "uploads/portfolios"
+        );
+
+        // 3) Repository-dən əlavə et
         await _portfolioRepository.AddAsync(portfolio);
         await _portfolioRepository.CommitAsync();
     }
@@ -31,10 +40,11 @@ public class PortfolioService : IPortfolioService
         if (existPortfolio == null)
             throw new EntityNotFoundException("Portfolio tapılmadı!");
 
-        // Fayl adını çıxarmaq
-        string fileName = Path.GetFileName(existPortfolio.ImagePath);
-        Helper.DeleteFile(_env.WebRootPath, "uploads/portfolios", fileName);
+        // Faylı sil
+        // existPortfolio.ImagePath == "/uploads/portfolios/abcd.jpg"
+        Helper.DeleteImage(_env, existPortfolio.ImagePath);
 
+        // Database-dən sil
         _portfolioRepository.Delete(existPortfolio);
         _portfolioRepository.Commit();
     }
@@ -51,27 +61,33 @@ public class PortfolioService : IPortfolioService
 
     public void UpdatePortfolio(int id, Portfolio newPortfolio)
     {
+        // 1) Mövcud portfolionu götür
         var oldPortfolio = _portfolioRepository.Get(x => x.Id == id);
-
         if (oldPortfolio == null)
             throw new EntityNotFoundException("Portfolio tapılmadı!");
 
-        if (newPortfolio.ImageFile != null)
+        // 2) Əgər yeni fayl varsa, köhnəni sil və yenisini yaz
+        if (newPortfolio.ImageFile != null && newPortfolio.ImageFile.Length > 0)
         {
-            // Köhnə fayl varsa sil
-            if (!string.IsNullOrEmpty(oldPortfolio.ImagePath))
+            // 2.1) Köhnə şəkli sil
+            if (!string.IsNullOrWhiteSpace(oldPortfolio.ImagePath))
             {
-                string oldFileName = Path.GetFileName(oldPortfolio.ImagePath);
-                Helper.DeleteFile(_env.WebRootPath, "uploads/portfolios", oldFileName);
+                Helper.DeleteImage(_env, oldPortfolio.ImagePath);
             }
 
-            // Yeni faylı əlavə et
-            oldPortfolio.ImagePath = Helper.SaveFile(_env.WebRootPath, "uploads/portfolios", newPortfolio.ImageFile);
+            // 2.2) Yeni şəkli saxla və relative URL-i al
+            oldPortfolio.ImagePath = Helper.SaveImage(
+                _env,
+                newPortfolio.ImageFile,
+                "uploads/portfolios"
+            );
         }
 
+        // 3) Digər sahələri yenilə
         oldPortfolio.Title = newPortfolio.Title;
         oldPortfolio.ProjectUrl = newPortfolio.ProjectUrl;
 
+        // 4) Dəyişiklikləri DB-ə yaz
         _portfolioRepository.Commit();
     }
 }

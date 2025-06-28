@@ -1,40 +1,54 @@
-﻿using BlogSite.Business.Exceptions;
+﻿using System;
+using System.IO;
+using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
-using System;
+using BlogSite.Business.Exceptions;
 
 public static class Helper
 {
-    public static string SaveFile(string rootPath, string folder, IFormFile file)
+    // folderPath misal üçün "uploads/portfolios"
+    public static string SaveImage(IWebHostEnvironment env, IFormFile file, string folderPath)
     {
-        if (file.ContentType != "image/png" && file.ContentType != "image/jpeg")
+        // 1) Təzə content-type yoxlaması
+        if (file == null || !file.ContentType.StartsWith("image/"))
             throw new ImageContentException("Fayl formatı düzgün deyil!");
-        if (file.Length > 2097152)
+
+        // 2) Maksimum ölçü: 2 MB
+        const long maxBytes = 2 * 1024 * 1024;
+        if (file.Length > maxBytes)
             throw new ImageSizeException("Fayl 2 MB-dan böyük ola bilməz!");
 
-        string fileName = Guid.NewGuid().ToString() + Path.GetExtension(file.FileName);
-        string folderPath = Path.Combine(rootPath, folder);
+        // 3) Fiziki qovluğu hazırla: wwwroot/uploads/portfolios
+        string uploadsRoot = Path.Combine(env.WebRootPath, folderPath);
+        if (!Directory.Exists(uploadsRoot))
+            Directory.CreateDirectory(uploadsRoot);
 
-        if (!Directory.Exists(folderPath))
-            Directory.CreateDirectory(folderPath);
+        // 4) Unikal ad + uzantı
+        string ext = Path.GetExtension(file.FileName);
+        string fileName = $"{Guid.NewGuid()}{ext}";
+        string fullPath = Path.Combine(uploadsRoot, fileName);
 
-        string path = Path.Combine(folderPath, fileName);
+        // 5) Yaz
+        using (var fs = new FileStream(fullPath, FileMode.Create))
+            file.CopyTo(fs);
 
-        using (FileStream fileStream = new FileStream(path, FileMode.Create))
-        {
-            file.CopyTo(fileStream);
-        }
-
-        // Yalnız fayl adını deyil, route path-in tamamını qaytarmaq daha yaxşı olar
-        return $"/{folder}/{fileName}";
+        // 6) Browser üçün relative URL: "uploads/portfolios/abcd.jpg"
+        var relative = Path.Combine(folderPath, fileName)
+                           .Replace("\\", "/");  // windows slash-ları əvəz et
+        return "/" + relative;       // -> "/uploads/portfolios/abcd.jpg"
     }
 
-    public static void DeleteFile(string rootPath, string folder, string fileName)
+    public static void DeleteImage(IWebHostEnvironment env, string relativeUrl)
     {
-        string path = Path.Combine(rootPath, folder, fileName);
+        if (string.IsNullOrWhiteSpace(relativeUrl))
+            return;
 
-        if (!File.Exists(path))
-            throw new BlogSite.Business.Exceptions.FileNotFoundException("Fayl tapılmadı");
+        // "/uploads/portfolios/abcd.jpg" -> "uploads/portfolios/abcd.jpg"
+        var trimmed = relativeUrl.TrimStart('/', '\\');
+        var fullPath = Path.Combine(env.WebRootPath, trimmed);
 
-        File.Delete(path);
+        if (File.Exists(fullPath))
+            File.Delete(fullPath);
+        // yoxdursa sakitcə çıx (və ya özünüz exception atın)
     }
 }
