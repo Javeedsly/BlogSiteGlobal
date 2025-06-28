@@ -24,20 +24,20 @@ namespace BlogSite.Web.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Send(ContactMessage message)
+        public async Task<IActionResult> Send(ContactMessage contactMessage) // Renamed parameter to avoid conflict  
         {
             if (!ModelState.IsValid)
             {
-                return View("Index", message);
+                return RedirectToAction("Index", contactMessage);
             }
 
             try
             {
-                string body = $"Name: {message.Name}\nEmail: {message.Email}\n\nMessage:\n{message.Message}";
+                string body = $"Name: {contactMessage.Name}\nEmail: {contactMessage.Email}\n\nMessage:\n{contactMessage.Message}";
 
-                await _emailSender.SendEmailAsync("cavidsly@gmail.com", message.Subject, body);
+                await _emailSender.SendEmailAsync("cavidsly@gmail.com", contactMessage.Subject, body);
 
-                _context.ContactMessages.Add(message);
+                _context.ContactMessages.Add(contactMessage);
                 await _context.SaveChangesAsync();
 
                 TempData["Success"] = "Mesajınız uğurla göndərildi!";
