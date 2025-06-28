@@ -1,22 +1,19 @@
 ﻿using BlogSite.Core.Models;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Configuration;
-using System.Net.Mail;
-using System.Threading.Tasks;
-using BlogSite.Data;
+using BlogSite.Business.Services.Abstract;
 using BlogSite.Data.DAL;
+using Microsoft.AspNetCore.Mvc;
 
-namespace BlogSite.Controllers
+namespace BlogSite.Web.Controllers
 {
     public class ContactController : Controller
     {
         private readonly AppDbContext _context;
-        private readonly IConfiguration _configuration;
+        private readonly IEmailSender _emailSender;
 
-        public ContactController(AppDbContext context, IConfiguration configuration)
+        public ContactController(AppDbContext context, IEmailSender emailSender)
         {
             _context = context;
-            _configuration = configuration;
+            _emailSender = emailSender;
         }
 
         [HttpGet]
@@ -34,44 +31,23 @@ namespace BlogSite.Controllers
                 return View("Index", message);
             }
 
-            // Verilənlər bazasına əlavə et
-            _context.ContactMessages.Add(message);
-            await _context.SaveChangesAsync();
-
             try
             {
-                // Email göndər
-                var smtpClient = new SmtpClient(_configuration["Smtp:Host"])
-                {
-                    Port = int.Parse(_configuration["Smtp:Port"]),
-                    Credentials = new System.Net.NetworkCredential(
-                        _configuration["Smtp:Email"],
-                        _configuration["Smtp:Password"]
-                    ),
-                    EnableSsl = true,
-                };
+                string body = $"Name: {message.Name}\nEmail: {message.Email}\n\nMessage:\n{message.Message}";
 
-                var mailMessage = new MailMessage
-                {
-                    From = new MailAddress(_configuration["Smtp:Email"]),
-                    Subject = message.Subject,
-                    Body = $"Name: {message.Name}\nEmail: {message.Email}\n\nMessage:\n{message.Message}",
-                    IsBodyHtml = false,
-                };
+                await _emailSender.SendEmailAsync("cavidsly@gmail.com", message.Subject, body);
 
-                mailMessage.To.Add("cavidsly@gmail.com");
+                _context.ContactMessages.Add(message);
+                await _context.SaveChangesAsync();
 
-                await smtpClient.SendMailAsync(mailMessage);
+                TempData["Success"] = "Mesajınız uğurla göndərildi!";
+                return RedirectToAction("Index");
             }
             catch (System.Exception ex)
             {
-                // Əgər email göndərərkən xəta olsa, log və ya mesaj verə bilərsən
                 TempData["Error"] = "Email göndərərkən xəta baş verdi: " + ex.Message;
                 return RedirectToAction("Index");
             }
-
-            TempData["Success"] = "Mesajınız uğurla göndərildi!";
-            return RedirectToAction("Index");
         }
     }
 }

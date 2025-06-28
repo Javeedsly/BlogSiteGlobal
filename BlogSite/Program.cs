@@ -1,9 +1,11 @@
 using BlogSite.Business.Services.Abstract;
+using BlogSite.Business.Services.Concretes;
 using BlogSite.Core.Models;
 using BlogSite.Core.RepositoryAbstract;
 using BlogSite.Data.DAL;
 using BlogSite.Data.RepositoryConcretes;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Identity.UI.Services;
 using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -33,6 +35,8 @@ builder.Services.ConfigureApplicationCookie(options =>
 builder.Services.AddScoped<IPortfolioService, PortfolioService>();
 
 builder.Services.AddScoped<IPortfolioRepository, PortfolioRepository>();
+
+builder.Services.AddTransient<BlogSite.Business.Services.Abstract.IEmailSender, SmtpEmailSender>();
 var app = builder.Build();
 
 if (!app.Environment.IsDevelopment())
