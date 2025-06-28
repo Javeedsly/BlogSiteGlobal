@@ -16,6 +16,7 @@ namespace BlogSite.Data.DAL
         }
         public DbSet<AppUser> AppUsers { get; set; }
         public DbSet<Portfolio> Portfolio { get; set; }
+        public DbSet<ContactMessage> ContactMessages { get; set; }
 
     }
 }
