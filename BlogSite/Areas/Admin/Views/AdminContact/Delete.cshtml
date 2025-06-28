@@ -1,0 +1,31 @@
+﻿@model ContactMessage
+
+@{
+    ViewData["Title"] = "Mesajı Sil";
+}
+
+<div class="container mt-5">
+    <h2>Mesajı Sil</h2>
+    <hr />
+    <h5>Bu mesajı silmək istədiyinizə əminsiniz?</h5>
+
+    <dl class="row mt-4">
+        <dt class="col-sm-2">Ad</dt>
+        <dd class="col-sm-10">@Model.Name</dd>
+
+        <dt class="col-sm-2">Email</dt>
+        <dd class="col-sm-10">@Model.Email</dd>
+
+        <dt class="col-sm-2">Mövzu</dt>
+        <dd class="col-sm-10">@Model.Subject</dd>
+
+        <dt class="col-sm-2">Mesaj</dt>
+        <dd class="col-sm-10">@Model.Message</dd>
+    </dl>
+
+    <form asp-action="Delete" method="post">
+        <input type="hidden" asp-for="Id" />
+        <button type="submit" class="btn btn-danger">Sil</button>
+        <a asp-action="Index" class="btn btn-secondary">Geri</a>
+    </form>
+</div>

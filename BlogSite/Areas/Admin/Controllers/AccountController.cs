@@ -74,8 +74,8 @@ namespace BlogSite.Areas.Admin.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Logout()
         {
-            await HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
-            return RedirectToAction("Login", "Account");
+            await _signInManager.SignOutAsync();
+            return RedirectToAction("Login", "Account", new { area = "Admin" });
         }
     }
 }

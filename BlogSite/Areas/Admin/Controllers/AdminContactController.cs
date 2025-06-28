@@ -22,5 +22,20 @@ namespace BlogSite.Areas.Admin.Controllers
 
             return View(messages);
         }
+
+        [HttpGet]
+        public async Task<IActionResult> Delete(int id)
+        {
+            var message = await _context.ContactMessages.FindAsync(id);
+            if (message == null)
+            {
+                return NotFound();
+            }
+
+            _context.ContactMessages.Remove(message);
+            await _context.SaveChangesAsync();
+
+            return RedirectToAction(nameof(Index));
+        }
     }
 }
