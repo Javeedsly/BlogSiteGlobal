@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace BlogSite.Data.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20250628172311_Contact")]
-    partial class Contact
+    [Migration("20250827113605_initial")]
+    partial class initial
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
